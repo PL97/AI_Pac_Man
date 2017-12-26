@@ -85,12 +85,12 @@ def commonSearch(problem, container):
         node = temp[0]
         path = temp[1]
         cost = temp[2]
-        close.append(node)
         #quit if reach the goal
         if problem.isGoalState(node):
             break;
         for successor in problem.getSuccessors(node):
             if successor[0] not in close:
+                close.append(successor[0])
                 container.push([successor[0],path+[successor[1]],cost+successor[2]])
     return path
 
