@@ -72,44 +72,29 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
-def searchAll12(problem,Q):
+def searchAll(problem,Q):
+    """"初始化close表和保存输出路径的list"""
     closed = []
     ans = []
     Start = problem.getStartState()
-    closed.append(Start)
-    father = {}
+    """将初始状态放入open表中"""
     Q.push((Start, [],0))
-    flag = 0
+    """当open表为空时退出循环"""
     while (not Q.isEmpty()):
+        """从open表中取出一个节点"""
         Node = Q.pop()
         cost = Node[2]
+        """判断该节点是否在close表中，如果在则重新从open表中取出节点，这保证了扩展的节点不重复"""
+        if Node[0] in closed:
+            continue
+        """将节点放入close表中并判断该节点是否为目标节点，如果是目标节点则成功直接退出返回路径"""
+        closed.append(Node[0])
         if problem.isGoalState(Node[0]):
             ans = Node[1]
             break
+        """将新扩展的节点放入到open表中"""
         for nextNode in problem.getSuccessors(Node[0]):
-            if nextNode[0] not in closed:
                 Q.push((nextNode[0], Node[1] + [nextNode[1]],cost + nextNode[2]))
-    return ans
-
-
-def searchAll3(problem,Q):
-    closed = []
-    ans = []
-    Start = problem.getStartState()
-    closed.append(Start)
-    father = {}
-    Q.push((Start, [],0),0)
-    flag = 0
-    while (not Q.isEmpty()):
-        Node = Q.pop()
-        cost = Node[2]
-        if problem.isGoalState(Node[0]):
-            ans = Node[1]
-            break
-        for nextNode in problem.getSuccessors(Node[0]):
-            if nextNode[0] not in closed:
-                closed.append(nextNode[0])
-                Q.push((nextNode[0], Node[1] + [nextNode[1]],cost + nextNode[2]),cost + nextNode[2])
     return ans
 def depthFirstSearch(problem):
     """
@@ -125,23 +110,27 @@ def depthFirstSearch(problem):
     print "Is the start a goal?", problem.isGoalState(problem.getStartState())
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
+    """定义栈作为open表"""
     Q = util.Stack()
-    ans = searchAll12(problem,Q)
+    ans = searchAll(problem,Q)
     return ans
     util.raiseNotDefined()
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
+    """定义队列作为open表"""
     Q = util.Queue()
-    ans = searchAll12(problem, Q)
+    ans = searchAll(problem, Q)
     return ans
     util.raiseNotDefined()
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    Q = util.PriorityQueue()
-    ans = searchAll3(problem, Q)
+    """定义优先队列作为open表，判断准则为走过路径的长度"""
+    cost = lambda node: node[2]
+    Q = util.PriorityQueueWithFunction(cost)
+    ans = searchAll(problem, Q)
     return ans
     util.raiseNotDefined()
 
@@ -151,20 +140,18 @@ def nullHeuristic(state, problem=None):
     goal in the provided SearchProblem.  This heuristic is trivial.
     """
     return 0
-def nullHeuristic(state, problem=None):
-    """
-    A heuristic function estimates the cost from the current state to the nearest
-    goal in the provided SearchProblem.  This heuristic is trivial.
-    """
-    return 0
+
+def manhattanHeuristic(pos,problem):
+    goal = problem.goal
+    return util.manhattanDistance(pos,goal)
+
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    goal = problem.goal
-    def compare(item):
-        return util.manhattanDistance(item[0],goal) + item[2]
-    Q = util.PriorityQueueWithFunction(compare)
-    ans = searchAll12(problem, Q)
+    """定义优先队列作为open表，判断准则为走过路径的长度+启发式函数的返回值，启发式函数返回的是曼哈顿距离"""
+    cost = lambda node: node[2] + heuristic(node[0], problem)
+    Q = util.PriorityQueueWithFunction(cost)
+    ans = searchAll(problem, Q)
     return ans
     util.raiseNotDefined()
 
