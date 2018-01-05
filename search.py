@@ -72,28 +72,45 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
+def searchAll12(problem,Q):
+    closed = []
+    ans = []
+    Start = problem.getStartState()
+    closed.append(Start)
+    father = {}
+    Q.push((Start, [],0))
+    flag = 0
+    while (not Q.isEmpty()):
+        Node = Q.pop()
+        cost = Node[2]
+        if problem.isGoalState(Node[0]):
+            ans = Node[1]
+            break
+        for nextNode in problem.getSuccessors(Node[0]):
+            if nextNode[0] not in closed:
+                Q.push((nextNode[0], Node[1] + [nextNode[1]],cost + nextNode[2]))
+    return ans
 
-def commonSearch(problem, container):
-    #initialize the close set(infringe set)
-    close = []
-    path = []
-    cost = 0
-    node = problem.getStartState()
-    container.push([node, path, cost])
-    while not container.isEmpty():
-        temp = container.pop()
-        node = temp[0]
-        path = temp[1]
-        cost = temp[2]
-        #quit if reach the goal
-        if problem.isGoalState(node):
-            break;
-        for successor in problem.getSuccessors(node):
-            if successor[0] not in close:
-                close.append(successor[0])
-                container.push([successor[0],path+[successor[1]],cost+successor[2]])
-    return path
 
+def searchAll3(problem,Q):
+    closed = []
+    ans = []
+    Start = problem.getStartState()
+    closed.append(Start)
+    father = {}
+    Q.push((Start, [],0),0)
+    flag = 0
+    while (not Q.isEmpty()):
+        Node = Q.pop()
+        cost = Node[2]
+        if problem.isGoalState(Node[0]):
+            ans = Node[1]
+            break
+        for nextNode in problem.getSuccessors(Node[0]):
+            if nextNode[0] not in closed:
+                closed.append(nextNode[0])
+                Q.push((nextNode[0], Node[1] + [nextNode[1]],cost + nextNode[2]),cost + nextNode[2])
+    return ans
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
@@ -108,45 +125,48 @@ def depthFirstSearch(problem):
     print "Is the start a goal?", problem.isGoalState(problem.getStartState())
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
-    "*** YOUR CODE HERE ***"
     Q = util.Stack()
-    return commonSearch(problem,Q)    
-
+    ans = searchAll12(problem,Q)
+    return ans
+    util.raiseNotDefined()
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    #another solution
-    #solution 1
-    #return commonSearch(problem, util.Queue())
-    #solution 2
-    cost = lambda node: len(node[1])
-    Q = util.PriorityQueueWithFunction(cost)
-    return commonSearch(problem,Q)
+    Q = util.Queue()
+    ans = searchAll12(problem, Q)
+    return ans
+    util.raiseNotDefined()
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    cost = lambda node: node[2]
-    Q = util.PriorityQueueWithFunction(cost)
-    return commonSearch(problem,Q)
+    Q = util.PriorityQueue()
+    ans = searchAll3(problem, Q)
+    return ans
+    util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
     """
     A heuristic function estimates the cost from the current state to the nearest
     goal in the provided SearchProblem.  This heuristic is trivial.
     """
-    destination = problem.goal
-    x = state[0] - destination[0]
-    y = state[1] - destination[1]
-    return abs(x)+abs(y)
-
+    return 0
+def nullHeuristic(state, problem=None):
+    """
+    A heuristic function estimates the cost from the current state to the nearest
+    goal in the provided SearchProblem.  This heuristic is trivial.
+    """
+    return 0
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    cost = lambda node: node[2]+heuristic(node[0], problem)
-    Q = util.PriorityQueueWithFunction(cost)
-    return commonSearch(problem,Q)
-
+    goal = problem.goal
+    def compare(item):
+        return util.manhattanDistance(item[0],goal) + item[2]
+    Q = util.PriorityQueueWithFunction(compare)
+    ans = searchAll12(problem, Q)
+    return ans
+    util.raiseNotDefined()
 
 # Abbreviations
 bfs = breadthFirstSearch
